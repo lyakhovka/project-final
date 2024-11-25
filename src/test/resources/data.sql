@@ -54,8 +54,6 @@ values (1, 'skype', 'userSkype'),
        (1, 'website', 'user.com'),
        (2, 'github', 'adminGitHub'),
        (2, 'tg', 'adminTg');
---        (2, 'vk', 'adminVk');
-
 
 insert into PROJECT (code, title, description, type_code, parent_id)
 values ('PR1', 'PROJECT-1', 'test project 1', 'task_tracker', null),
