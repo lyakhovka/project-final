@@ -3,11 +3,14 @@ package com.javarush.jira.bugtracking.task;
 import com.javarush.jira.bugtracking.Handlers;
 import com.javarush.jira.bugtracking.UserBelong;
 import com.javarush.jira.bugtracking.UserBelongRepository;
+import com.javarush.jira.bugtracking.task.tag.TaskTagRepository;
+import com.javarush.jira.bugtracking.task.tag.TaskTagService;
 import com.javarush.jira.bugtracking.task.to.ActivityTo;
 import com.javarush.jira.bugtracking.task.to.TaskTo;
 import com.javarush.jira.bugtracking.task.to.TaskToExt;
 import com.javarush.jira.bugtracking.task.to.TaskToFull;
 import com.javarush.jira.bugtracking.tree.ITreeNode;
+import com.javarush.jira.common.error.NotFoundException;
 import com.javarush.jira.common.util.Util;
 import com.javarush.jira.login.AuthUser;
 import jakarta.annotation.Nullable;
@@ -15,6 +18,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +43,7 @@ public class TaskController {
     private final Handlers.TaskHandler handler;
     private final Handlers.ActivityHandler activityHandler;
     private final UserBelongRepository userBelongRepository;
+    private final TaskRepository taskRepository;
 
 
     @GetMapping("/{id}")
@@ -155,5 +160,18 @@ public class TaskController {
         public TaskTreeNode(TaskTo taskTo) {
             this(taskTo, new LinkedList<>());
         }
+    }
+
+    @Autowired
+    private TaskTagService taskTagService;
+
+    @PostMapping("/{id}/tags")
+    public ResponseEntity<Void> addTagsToTask(@PathVariable long id, @RequestBody List<String> tags) {
+        // Find the task by ID (you may want to handle NotFoundException here)
+        Task task = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task not found"));
+
+        taskTagService.addTagsToTask(task, tags);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
