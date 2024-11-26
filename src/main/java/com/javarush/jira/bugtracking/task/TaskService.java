@@ -17,8 +17,10 @@ import com.javarush.jira.ref.RefType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,6 +41,33 @@ public class TaskService {
     private final SprintRepository sprintRepository;
     private final TaskExtMapper extMapper;
     private final UserBelongRepository userBelongRepository;
+
+    @Autowired
+    private ActivityRepository activityRepository;
+
+    // Method 1: Time spent in development (ready_for_review - in_progress)
+    public Duration calculateDevelopmentTime(Task task) {
+        Activity inProgress = activityRepository.findByTaskAndStatus(task, "in_progress");
+        Activity readyForReview = activityRepository.findByTaskAndStatus(task, "ready_for_review");
+
+        if (inProgress != null && readyForReview != null) {
+            return Duration.between(inProgress.getUpdated(), readyForReview.getUpdated());
+        }
+
+        return Duration.ZERO;
+    }
+
+    // Method 2: Time spent in testing (done - ready_for_review)
+    public Duration calculateTestingTime(Task task) {
+        Activity readyForReview = activityRepository.findByTaskAndStatus(task, "ready_for_review");
+        Activity done = activityRepository.findByTaskAndStatus(task, "done");
+
+        if (readyForReview != null && done != null) {
+            return Duration.between(readyForReview.getUpdated(), done.getUpdated());
+        }
+
+        return Duration.ZERO;
+    }
 
     @Transactional
     public void changeStatus(long taskId, String statusCode) {

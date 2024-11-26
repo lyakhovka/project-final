@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -167,11 +168,22 @@ public class TaskController {
 
     @PostMapping("/{id}/tags")
     public ResponseEntity<Void> addTagsToTask(@PathVariable long id, @RequestBody List<String> tags) {
-        // Find the task by ID (you may want to handle NotFoundException here)
         Task task = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task not found"));
-
         taskTagService.addTagsToTask(task, tags);
-
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/{taskId}/development-time")
+    public ResponseEntity<Duration> getDevelopmentTime(@PathVariable Long taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
+        Duration developmentTime = taskService.calculateDevelopmentTime(task);
+        return ResponseEntity.ok(developmentTime);
+    }
+
+    @GetMapping("/{taskId}/testing-time")
+    public ResponseEntity<Duration> getTestingTime(@PathVariable Long taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
+        Duration testingTime = taskService.calculateTestingTime(task);
+        return ResponseEntity.ok(testingTime);
     }
 }

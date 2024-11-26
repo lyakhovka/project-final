@@ -329,3 +329,9 @@ values ('todo', 'ToDo', 3, 'in_progress,canceled|'),
 
 drop index UK_USER_BELONG;
 create unique index UK_USER_BELONG on USER_BELONG (OBJECT_ID, OBJECT_TYPE, USER_ID, USER_TYPE_CODE) where ENDPOINT is null;
+
+--insert records to ACTIVITY required for time calculation methods for tasks
+insert into ACTIVITY (ID, AUTHOR_ID, TASK_ID, UPDATED, STATUS_CODE)
+values (1, 1, 1, '2024-01-01', 'in_progress'),
+       (2, 1, 1, '2024-01-05', 'ready_for_review'),
+       (3, 1, 1, '2024-01-10', 'done');
