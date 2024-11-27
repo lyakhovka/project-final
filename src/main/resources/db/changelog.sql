@@ -152,6 +152,7 @@ create table ACTIVITY
 
 create table TASK_TAG
 (
+    ID bigint not null,
     TASK_ID bigint      not null,
     TAG     varchar(32) not null,
     constraint UK_TASK_TAG unique (TASK_ID, TAG),
@@ -218,7 +219,6 @@ values ('task', 'Task', 2),
        ('mobile', 'Mobile', 0),
        ('phone', 'Phone', 0),
        ('website', 'Website', 0),
---        ('vk', 'VK', 0),
        ('linkedin', 'LinkedIn', 0),
        ('github', 'GitHub', 0),
 -- PRIORITY
@@ -330,7 +330,28 @@ values ('todo', 'ToDo', 3, 'in_progress,canceled|'),
 drop index UK_USER_BELONG;
 create unique index UK_USER_BELONG on USER_BELONG (OBJECT_ID, OBJECT_TYPE, USER_ID, USER_TYPE_CODE) where ENDPOINT is null;
 
+delete
+from PROJECT
+where ID=1;
+insert into PROJECT (ID, CODE, TITLE, DESCRIPTION, TYPE_CODE)
+values (1, 'PRJ1', 'Sample Project', 'Description for project', 'scrum');
+
+delete
+from TASK
+where ID=1;
+insert into TASK (ID, TITLE, TYPE_CODE, STATUS_CODE, PROJECT_ID)
+values (1, 'Sample Task', 'task', 'todo', 1);
+
+delete
+from USERS
+where ID=1;
+insert into USERS (ID, DISPLAY_NAME, EMAIL, FIRST_NAME, LAST_NAME, PASSWORD, ENDPOINT, STARTPOINT)
+values (1, 'Olena', 'email@gmail.com', 'Olena', 'Zelena', 'PASSWORD',null,null);
+
 --insert records to ACTIVITY required for time calculation methods for tasks
+delete
+from ACTIVITY
+where id in (1,2,3);
 insert into ACTIVITY (ID, AUTHOR_ID, TASK_ID, UPDATED, STATUS_CODE)
 values (1, 1, 1, '2024-01-01', 'in_progress'),
        (2, 1, 1, '2024-01-05', 'ready_for_review'),

@@ -173,7 +173,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/{taskId}/development-time")
+    @GetMapping("/{id}/development-time")
     public ResponseEntity<Duration> getDevelopmentTime(@PathVariable Long taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
         Duration developmentTime = taskService.calculateDevelopmentTime(task);

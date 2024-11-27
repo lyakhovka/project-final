@@ -14,5 +14,6 @@ public interface ActivityRepository extends BaseRepository<Activity> {
     @Query("SELECT a FROM Activity a JOIN FETCH a.author WHERE a.taskId =:taskId AND a.comment IS NOT NULL ORDER BY a.updated DESC")
     List<Activity> findAllComments(long taskId);
 
-    Activity findByTaskAndStatus(Task task, String status);
+    @Query("SELECT a FROM Activity a WHERE a.taskId =:taskId AND a.statusCode =:status")
+    Activity findByTaskAndStatus(long taskId, String status);
 }

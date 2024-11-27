@@ -47,8 +47,9 @@ public class TaskService {
 
     // Method 1: Time spent in development (ready_for_review - in_progress)
     public Duration calculateDevelopmentTime(Task task) {
-        Activity inProgress = activityRepository.findByTaskAndStatus(task, "in_progress");
-        Activity readyForReview = activityRepository.findByTaskAndStatus(task, "ready_for_review");
+        long taskId = task.getId();
+        Activity inProgress = activityRepository.findByTaskAndStatus(taskId, "in_progress");
+        Activity readyForReview = activityRepository.findByTaskAndStatus(taskId, "ready_for_review");
 
         if (inProgress != null && readyForReview != null) {
             return Duration.between(inProgress.getUpdated(), readyForReview.getUpdated());
@@ -59,8 +60,9 @@ public class TaskService {
 
     // Method 2: Time spent in testing (done - ready_for_review)
     public Duration calculateTestingTime(Task task) {
-        Activity readyForReview = activityRepository.findByTaskAndStatus(task, "ready_for_review");
-        Activity done = activityRepository.findByTaskAndStatus(task, "done");
+        long taskId = task.getId();
+        Activity readyForReview = activityRepository.findByTaskAndStatus(taskId, "ready_for_review");
+        Activity done = activityRepository.findByTaskAndStatus(taskId, "done");
 
         if (readyForReview != null && done != null) {
             return Duration.between(readyForReview.getUpdated(), done.getUpdated());
