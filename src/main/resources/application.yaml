@@ -98,8 +98,13 @@ spring:
 #    username: jira4jr@gmail.com
 #    password: zdfzsrqvgimldzyj
     port: 587
-  thymeleaf.check-template-location: false
-
+#  thymeleaf.check-template-location: false
+  thymeleaf:
+    prefix: file:/resources/view/
+    suffix: .html
+    check-template-location: false
+    mode: HTML
+    cache: false
   mvc.throw-exception-if-no-handler-found: true
   web.resources.add-mappings: false
 
