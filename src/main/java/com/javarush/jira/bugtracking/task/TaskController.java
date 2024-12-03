@@ -168,9 +168,8 @@ public class TaskController {
 
     @PostMapping("/{id}/tags")
     public ResponseEntity<Void> addTagsToTask(@PathVariable long id, @RequestBody List<String> tags) {
-        Task task = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task not found"));
-        taskTagService.addTagsToTask(task, tags);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+       taskService.addTagsToTask(id, tags);
+       return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/{id}/development-time")

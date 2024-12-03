@@ -7,6 +7,7 @@ import com.javarush.jira.bugtracking.sprint.Sprint;
 import com.javarush.jira.bugtracking.sprint.SprintRepository;
 import com.javarush.jira.bugtracking.task.mapper.TaskExtMapper;
 import com.javarush.jira.bugtracking.task.mapper.TaskFullMapper;
+import com.javarush.jira.bugtracking.task.tag.TaskTagService;
 import com.javarush.jira.bugtracking.task.to.TaskToExt;
 import com.javarush.jira.bugtracking.task.to.TaskToFull;
 import com.javarush.jira.common.error.DataConflictException;
@@ -41,6 +42,7 @@ public class TaskService {
     private final SprintRepository sprintRepository;
     private final TaskExtMapper extMapper;
     private final UserBelongRepository userBelongRepository;
+    private final TaskRepository taskRepository;
 
     @Autowired
     private ActivityRepository activityRepository;
@@ -170,5 +172,14 @@ public class TaskService {
         if (!userType.equals(possibleUserType)) {
             throw new DataConflictException(String.format(assign ? CANNOT_ASSIGN : CANNOT_UN_ASSIGN, userType, task.getStatusCode()));
         }
+    }
+
+    @Autowired
+    private TaskTagService taskTagService;
+
+    @Transactional
+    public void addTagsToTask(long id, List<String> tags) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task not found"));
+        taskTagService.addTagsToTask(task, tags);
     }
 }
