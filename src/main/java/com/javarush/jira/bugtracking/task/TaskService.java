@@ -47,7 +47,6 @@ public class TaskService {
     @Autowired
     private ActivityRepository activityRepository;
 
-    // Method 1: Time spent in development (ready_for_review - in_progress)
     public Duration calculateDevelopmentTime(Task task) {
         long taskId = task.getId();
         Activity inProgress = activityRepository.findByTaskAndStatus(taskId, "in_progress");
@@ -60,7 +59,11 @@ public class TaskService {
         return Duration.ZERO;
     }
 
-    // Method 2: Time spent in testing (done - ready_for_review)
+    public Duration getDevelopmentTime(long taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
+        return calculateDevelopmentTime(task);
+    }
+
     public Duration calculateTestingTime(Task task) {
         long taskId = task.getId();
         Activity readyForReview = activityRepository.findByTaskAndStatus(taskId, "ready_for_review");
@@ -71,6 +74,11 @@ public class TaskService {
         }
 
         return Duration.ZERO;
+    }
+
+    public Duration getTestingTime(long taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
+        return calculateTestingTime(task);
     }
 
     @Transactional
@@ -182,4 +190,5 @@ public class TaskService {
         Task task = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task not found"));
         taskTagService.addTagsToTask(task, tags);
     }
+
 }

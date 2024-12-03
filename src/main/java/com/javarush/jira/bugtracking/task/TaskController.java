@@ -3,14 +3,12 @@ package com.javarush.jira.bugtracking.task;
 import com.javarush.jira.bugtracking.Handlers;
 import com.javarush.jira.bugtracking.UserBelong;
 import com.javarush.jira.bugtracking.UserBelongRepository;
-import com.javarush.jira.bugtracking.task.tag.TaskTagRepository;
 import com.javarush.jira.bugtracking.task.tag.TaskTagService;
 import com.javarush.jira.bugtracking.task.to.ActivityTo;
 import com.javarush.jira.bugtracking.task.to.TaskTo;
 import com.javarush.jira.bugtracking.task.to.TaskToExt;
 import com.javarush.jira.bugtracking.task.to.TaskToFull;
 import com.javarush.jira.bugtracking.tree.ITreeNode;
-import com.javarush.jira.common.error.NotFoundException;
 import com.javarush.jira.common.util.Util;
 import com.javarush.jira.login.AuthUser;
 import jakarta.annotation.Nullable;
@@ -44,8 +42,6 @@ public class TaskController {
     private final Handlers.TaskHandler handler;
     private final Handlers.ActivityHandler activityHandler;
     private final UserBelongRepository userBelongRepository;
-    private final TaskRepository taskRepository;
-
 
     @GetMapping("/{id}")
     public TaskToFull get(@PathVariable long id) {
@@ -174,15 +170,13 @@ public class TaskController {
 
     @GetMapping("/{id}/development-time")
     public ResponseEntity<Duration> getDevelopmentTime(@PathVariable Long taskId) {
-        Task task = taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
-        Duration developmentTime = taskService.calculateDevelopmentTime(task);
+        Duration developmentTime = taskService.getDevelopmentTime(taskId);
         return ResponseEntity.ok(developmentTime);
     }
 
     @GetMapping("/{taskId}/testing-time")
     public ResponseEntity<Duration> getTestingTime(@PathVariable Long taskId) {
-        Task task = taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
-        Duration testingTime = taskService.calculateTestingTime(task);
+        Duration testingTime = taskService.getTestingTime(taskId);
         return ResponseEntity.ok(testingTime);
     }
 }
