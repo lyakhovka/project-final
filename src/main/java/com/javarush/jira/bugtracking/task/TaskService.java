@@ -7,6 +7,7 @@ import com.javarush.jira.bugtracking.sprint.Sprint;
 import com.javarush.jira.bugtracking.sprint.SprintRepository;
 import com.javarush.jira.bugtracking.task.mapper.TaskExtMapper;
 import com.javarush.jira.bugtracking.task.mapper.TaskFullMapper;
+import com.javarush.jira.bugtracking.task.tag.TaskTagService;
 import com.javarush.jira.bugtracking.task.to.TaskToExt;
 import com.javarush.jira.bugtracking.task.to.TaskToFull;
 import com.javarush.jira.common.error.DataConflictException;
@@ -17,8 +18,10 @@ import com.javarush.jira.ref.RefType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,6 +42,44 @@ public class TaskService {
     private final SprintRepository sprintRepository;
     private final TaskExtMapper extMapper;
     private final UserBelongRepository userBelongRepository;
+    private final TaskRepository taskRepository;
+
+    @Autowired
+    private ActivityRepository activityRepository;
+
+    public Duration calculateDevelopmentTime(Task task) {
+        long taskId = task.getId();
+        Activity inProgress = activityRepository.findByTaskAndStatus(taskId, "in_progress");
+        Activity readyForReview = activityRepository.findByTaskAndStatus(taskId, "ready_for_review");
+
+        if (inProgress != null && readyForReview != null) {
+            return Duration.between(inProgress.getUpdated(), readyForReview.getUpdated());
+        }
+
+        return Duration.ZERO;
+    }
+
+    public Duration getDevelopmentTime(long taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
+        return calculateDevelopmentTime(task);
+    }
+
+    public Duration calculateTestingTime(Task task) {
+        long taskId = task.getId();
+        Activity readyForReview = activityRepository.findByTaskAndStatus(taskId, "ready_for_review");
+        Activity done = activityRepository.findByTaskAndStatus(taskId, "done");
+
+        if (readyForReview != null && done != null) {
+            return Duration.between(readyForReview.getUpdated(), done.getUpdated());
+        }
+
+        return Duration.ZERO;
+    }
+
+    public Duration getTestingTime(long taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
+        return calculateTestingTime(task);
+    }
 
     @Transactional
     public void changeStatus(long taskId, String statusCode) {
@@ -140,4 +181,14 @@ public class TaskService {
             throw new DataConflictException(String.format(assign ? CANNOT_ASSIGN : CANNOT_UN_ASSIGN, userType, task.getStatusCode()));
         }
     }
+
+    @Autowired
+    private TaskTagService taskTagService;
+
+    @Transactional
+    public void addTagsToTask(long id, List<String> tags) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task not found"));
+        taskTagService.addTagsToTask(task, tags);
+    }
+
 }

@@ -3,6 +3,7 @@ package com.javarush.jira.bugtracking.task;
 import com.javarush.jira.bugtracking.Handlers;
 import com.javarush.jira.bugtracking.UserBelong;
 import com.javarush.jira.bugtracking.UserBelongRepository;
+import com.javarush.jira.bugtracking.task.tag.TaskTagService;
 import com.javarush.jira.bugtracking.task.to.ActivityTo;
 import com.javarush.jira.bugtracking.task.to.TaskTo;
 import com.javarush.jira.bugtracking.task.to.TaskToExt;
@@ -15,11 +16,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,7 +42,6 @@ public class TaskController {
     private final Handlers.TaskHandler handler;
     private final Handlers.ActivityHandler activityHandler;
     private final UserBelongRepository userBelongRepository;
-
 
     @GetMapping("/{id}")
     public TaskToFull get(@PathVariable long id) {
@@ -155,5 +157,26 @@ public class TaskController {
         public TaskTreeNode(TaskTo taskTo) {
             this(taskTo, new LinkedList<>());
         }
+    }
+
+    @Autowired
+    private TaskTagService taskTagService;
+
+    @PostMapping("/{id}/tags")
+    public ResponseEntity<Void> addTagsToTask(@PathVariable long id, @RequestBody List<String> tags) {
+       taskService.addTagsToTask(id, tags);
+       return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/{id}/development-time")
+    public ResponseEntity<Duration> getDevelopmentTime(@PathVariable Long taskId) {
+        Duration developmentTime = taskService.getDevelopmentTime(taskId);
+        return ResponseEntity.ok(developmentTime);
+    }
+
+    @GetMapping("/{taskId}/testing-time")
+    public ResponseEntity<Duration> getTestingTime(@PathVariable Long taskId) {
+        Duration testingTime = taskService.getTestingTime(taskId);
+        return ResponseEntity.ok(testingTime);
     }
 }

@@ -1,0 +1,48 @@
+version: "2.24.6+ds1-0ubuntu1~22.04.1"
+services:
+  postgres-db-prod:
+    image: postgres
+    container_name: postgres-db  # Assign the container a name
+    environment:
+        POSTGRES_USER: jira  # Set the POSTGRES_USER environment variable
+        POSTGRES_PASSWORD: JiraRush
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data  # Mount ./pgdata directory on the host to the PostgreSQL data directory in the container
+    restart: always  # Optional: Automatically restart the container if it crashes
+#   detach: true
+
+  postgres-db-test:
+    image: postgres  # Use the official postgres image
+    container_name: postgres-db-test  # Assign the container a name
+    environment:
+      POSTGRES_USER: jira  # Set the POSTGRES_USER environment variable
+      POSTGRES_PASSWORD: JiraRush  # Set the POSTGRES_PASSWORD environment variable
+      PGDATA: /var/lib/postgresql/data/pgdata  # Set PGDATA location for the test database
+    ports:
+      - "5433:5432"  # Map port 5432 from the container to port 5433 on your local machine
+    volumes:
+      - ./pgdata-test:/var/lib/postgresql/data  # Mount ./pgdata-test directory for the test database
+    restart: always  # Automatically restart the container if it crashes
+
+  jira-rush-app:
+   image: jira-rush-app  # Use your custom Java application image
+   container_name: jira-rush-app  # Assign the container a name
+   build:
+     context: .  # Directory containing your Dockerfile (the current directory)
+   depends_on:
+      - postgres-db-prod
+      - postgres-db-test
+   ports:
+      - "8080:8080"  # Map port 8080 from the container to port 8080 on your local machine
+   volumes:
+     - ./resources:/app/resources
+   environment:
+     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/postgres  # Connection URL for PostgreSQL
+     SPRING_DATASOURCE_USERNAME: jira  # PostgreSQL username
+     SPRING_DATASOURCE_PASSWORD: JiraRush  # PostgreSQL password
+     SPRING_DATASOURCE_URL_TEST: jdbc:postgresql://postgres-db-test:5432/postgres  # Connection URL for the test PostgreSQL
+     SPRING_DATASOURCE_USERNAME_TEST: jira  # Test PostgreSQL username
+     SPRING_DATASOURCE_PASSWORD_TEST: JiraRush  # Test PostgreSQL password
+   restart: always  # Automatically restart the container if it crashes
